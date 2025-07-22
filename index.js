@@ -12,18 +12,15 @@ const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 6011;
 
-// -------------------------
 // ✅ Load Models First
 require("./models/organization.details.model");
 require("./models/PostedJob.model");
-require("./models/SavedJob.model"); // ✅ Include this model
+require("./models/SavedJob.model");
 require('./models/associations');
 
 // ✅ Setup Associations (MUST BE CALLED)
 // setupAssociations();
-// -------------------------
 
-// -------------------------
 // Middlewares
 app.use(
   cors({
@@ -35,13 +32,11 @@ app.use(express.json({ limit: "20mb" }));
 app.use(cookieParser());
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
-// -------------------------
 // Static Files
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/v1/photo", express.static(path.join(__dirname, "./uploads/companyLogos")));
 app.use("/api/v1/userlogo", express.static(path.join(__dirname, "./uploads/userLogos")));
 
-// -------------------------
 // Basic Routes
 app
   .get("/", (req, res) => {
@@ -51,7 +46,6 @@ app
     return res.status(200).sendFile(path.join(__dirname, "public/templates", "index.html"));
   });
 
-// -------------------------
 // API Routes
 app.use("/api/v1/personalDetails", require("./routes/PersonalDetails.routes"));
 app.use("/api/v1/professionalDetails", require("./routes/ProfessionalDetails.routes"));
@@ -61,9 +55,8 @@ app.use("/api/v1/postedjob", require("./routes/PostedJob.routes"));
 app.use("/api/v1/admin", require("./routes/Admin.routes"));
 app.use("/api/v1/savedjob", require("./routes/SavedJob.routes"));
 app.use("/api/v1/jobApplication", require("./routes/jobApplication.routes"));
+app.use('/public', express.static('public'));
 
-
-// -------------------------
 // DB Connection
 const initiateConnection = async () => {
   try {

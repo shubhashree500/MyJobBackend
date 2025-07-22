@@ -5,7 +5,8 @@ const {
     getJobById,
     updateJob,
     deleteJob,
-    getJobCount
+    getJobCount,
+    getJobsByCompany
 
 } = require("../controllers/PostedJob.controller"); // Importing the job controller
 
@@ -27,5 +28,7 @@ router.put("/update/:id", updateJob);
 
 // Route to delete a job by ID
 router.delete("/delete/:id", deleteJob);
+
+router.get('/organization/:compId/jobs', getJobsByCompany);
 
 module.exports = router;

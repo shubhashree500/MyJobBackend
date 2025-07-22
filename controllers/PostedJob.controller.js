@@ -1,10 +1,10 @@
-
 const { v4: uuidv4 } = require('uuid');
 const { Sequelize, Op } = require('sequelize');
 const sequelize = require("../config/db.config");
 const PostedJob = require("../models/PostedJob.model");
 const Organization = require("../models/organization.details.model");
 
+// Create a new job
 const createJob = async (req, res) => {
   try {
     const {
@@ -33,19 +33,19 @@ const createJob = async (req, res) => {
     }
 
     const newJob = await PostedJob.create({
-  id: uuidv4(), // generate UUID string here
-  compId: trimmedCompId,
-  degName,
-  secName,
-  jobLocation,
-  skills,
-  jobDescription,
-  yearsOfExperience,
-  requirements,
-  jobType,
-  workPlaceType,
-  status: 1,
-});
+      id: uuidv4(),
+      compId: trimmedCompId,
+      degName,
+      secName,
+      jobLocation,
+      skills,
+      jobDescription,
+      yearsOfExperience,
+      requirements,
+      jobType,
+      workPlaceType,
+      status: 1,
+    });
 
     res.status(201).json({
       success: true,
@@ -62,9 +62,10 @@ const createJob = async (req, res) => {
   }
 };
 
+// Get all jobs (for job seekers)
 const getAllJobs = async (req, res) => {
   try {
-    const { degName, skills, ...rest } = req.query;
+    const { degName, skills } = req.query;
     const whereClause = { status: 1 };
 
     if (skills) {
@@ -116,6 +117,7 @@ const getAllJobs = async (req, res) => {
   }
 };
 
+// Get job by ID
 const getJobById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -154,6 +156,53 @@ const getJobById = async (req, res) => {
   }
 };
 
+// Get jobs by company (for org dashboard)
+const getJobsByCompany = async (req, res) => {
+  try {
+    const { compId } = req.params;
+
+    const jobs = await PostedJob.findAll({
+      where: {
+        compId,
+        status: 1,
+      },
+      include: [
+        {
+          model: Organization,
+          as: "organization",
+          attributes: [
+            "organizationName",
+            "logo",
+            "address",
+            "email",
+            "phoneNo",
+            "website",
+            "description",
+            "industry",
+            "specialization",
+            "since",
+            "socialMediaLink",
+            "compId",
+          ],
+        },
+      ],
+    });
+
+    if (!jobs || jobs.length === 0) {
+      return res.status(404).json({ message: "No jobs found for this company" });
+    }
+
+    res.status(200).json({
+      message: "Company-specific jobs retrieved successfully",
+      data: jobs,
+    });
+  } catch (error) {
+    console.error("Error in getJobsByCompany:", error);
+    res.status(500).json({ message: "Error retrieving company jobs", error: error?.message });
+  }
+};
+
+// Update a job
 const updateJob = async (req, res) => {
   try {
     const { id } = req.params;
@@ -173,6 +222,7 @@ const updateJob = async (req, res) => {
   }
 };
 
+// Delete a job
 const deleteJob = async (req, res) => {
   try {
     const { id } = req.params;
@@ -190,6 +240,7 @@ const deleteJob = async (req, res) => {
   }
 };
 
+// Get job count
 const getJobCount = async (req, res) => {
   try {
     const count = await PostedJob.count();
@@ -207,10 +258,12 @@ const getJobCount = async (req, res) => {
   }
 };
 
+// ✅ Export all
 module.exports = {
   createJob,
   getAllJobs,
   getJobById,
+  getJobsByCompany,
   updateJob,
   deleteJob,
   getJobCount
